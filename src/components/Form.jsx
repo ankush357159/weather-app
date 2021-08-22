@@ -1,10 +1,14 @@
+import { useState, useEffect } from "react";
 import { Box, TextField, Button, makeStyles } from "@material-ui/core";
+
+import { getData } from "../service/api";
+import Information from "./Information";
 
 const useStyles = makeStyles({
 	component: {
 		padding: 10,
 		background: "#44586F",
-        display: "flex"
+		display: "flex",
 	},
 	input: {
 		color: "#fff",
@@ -20,21 +24,55 @@ const useStyles = makeStyles({
 });
 const Form = () => {
 	const classes = useStyles();
-	return (
-		<Box className={classes.component}>
-			<TextField
-				inputProps={{ className: classes.input }}
-				label='City'
-				className={classes.input}
-			/>
+	const [data, getWeatherData] = useState();
+	const [city, setCity] = useState("");
+	const [country, setCountry] = useState("");
+	const [click, handleClick] = useState(false);
 
-			<TextField
-            inputProps={{ className: classes.input }}
-            label='Country' />
-			<Button variant='contained' className={classes.button}>
-				Get Weather
-			</Button>
-		</Box>
+	useEffect(() => {
+		const getWeather = async () => {
+			city &&
+				(await getData(city, country).then((response) => {
+					getWeatherData(response.data);
+					console.log(response.data);
+				}));
+		};
+		getWeather();
+		handleClick(false);
+	}, [click]);
+
+	const handleCityChange = (value) => {
+		setCity(value);
+	};
+
+	const handleCountryChange = (value) => {
+		setCountry(value);
+	};
+	return (
+		<>
+			<Box className={classes.component}>
+				<TextField
+					inputProps={{ className: classes.input }}
+					onChange={(e) => handleCityChange(e.target.value)}
+					label='City'
+					className={classes.input}
+				/>
+
+				<TextField
+					inputProps={{ className: classes.input }}
+					onChange={(e) => handleCountryChange(e.target.value)}
+					label='Country'
+				/>
+				<Button
+					variant='contained'
+					className={classes.button}
+					onClick={() => handleClick(true)}
+				>
+					Get Weather
+				</Button>
+			</Box>
+			<Information data={data} />
+		</>
 	);
 };
 
